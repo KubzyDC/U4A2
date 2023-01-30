@@ -1,10 +1,4 @@
-# EVENTS = [
-# 	"Sports",
-# 	"History",
-# 	"Academic",
-# 	"Culture",
-# 	"Current events"
-# ]
+from tabulate import tabulate as tbl
 
 # Number into ordinal ie. 1 -> 1st, 2 -> 2nd
 ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(n // 10 % 10 != 1) * (n % 10 < 4) * n % 10::4])
@@ -56,12 +50,6 @@ final_ranking_table = []
 
 print("Welcome to the tournament!\n")
 
-# P6 ONLY
-# Print all events from EVENTS list
-# print("Here are the events you can take part in:")
-# for evt in EVENTS:
-# 	print(evt)
-
 # Number of events
 while True:
 	while True:
@@ -87,9 +75,9 @@ for k, v in events.items():
 	print(f"[{k}]: {v}")
 
 # Print out the scoring for individual events
-print("\nIndividual events:")
-for pos, pnt in indiv_pointing.items():
-	print(f"{ordinal(pos)} place gets {pnt} points")
+# print("\nIndividual events:")
+# for pos, pnt in indiv_pointing.items():
+# 	print(f"{ordinal(pos)} place gets {pnt} points")
 
 # Ask whether individual or team mode
 while True:
@@ -107,7 +95,7 @@ while True:
 	if not custom_points_choice == "Y" and not custom_points_choice == "N":
 		print("Invalid choice. Please select either Y or N.")
 	else:
-		print("You will be able to input the custom pointing system once you pick a game type.")
+		print("If applicable, you will be able to input the custom pointing system once you pick a game type.")
 		break
 
 if game_type_choice == "T":
@@ -131,7 +119,8 @@ if game_type_choice == "T":
 	for i in range(0, num_teams):
 		team_name = input(f"Team {i + 1} name:")
 		points.__setitem__(team_name, 0)
-		team_pointing.__setitem__(i + 1, 0)
+		if custom_points_choice == "Y":
+			team_pointing.__setitem__(i + 1, 0)
 
 	# Get custom pointing system if chosen above
 	if custom_points_choice == "Y":
@@ -178,37 +167,50 @@ if game_type_choice == "T":
 		# Add list of members to dictionary with key of team name
 		team_members.__setitem__(team, members)
 
-	ranking_table_teams = []
-
 	for evt in events:
-		print("Please specify ranking for event ", events[evt])
+		print("Please specify ranking for event", events[evt])
 
 		to_append_list = []
 
+		# print(len(points))
 		# For every team
 		for i in range(0, len(points)):
 			temp_ranking = {}
 
 			while True:
-				temp_ranking[ordinal(i)] = input(f"{ordinal(i)} place: ")
+				temp_ranking[ordinal(i)] = input(f"{ordinal(i+1)} place: ")
 
 				if temp_ranking[ordinal(i)] in points.keys():
 					break
 				else:
 					print("Invalid team name given")
 
-			to_append_list += temp_ranking[ordinal(i)]
+			to_append_list.append(temp_ranking[ordinal(i)])
 
-		ranking_table_teams.append(to_append_list)
+		final_ranking_table.append(to_append_list)
 
-	for evt in final_ranking_table:
-		for i in range(0, len(final_ranking_table[final_ranking_table.index(evt)])):
-			points[final_ranking_table[final_ranking_table.index(evt)][i]] = points[final_ranking_table[final_ranking_table.index(evt)][i]] + team_pointing[i+1]
+	# Abbreviated for simplicity + visibility
+	frt = final_ranking_table
+	for evt in frt:
+		for i in range(0, len(frt[frt.index(evt)])):
+			# Gets name of team from final ranking table and adds points based on position from pointing table
+			points[frt[frt.index(evt)][i]] = points[frt[frt.index(evt)][i]] + team_pointing[i+1]
+
+	# print(frt)
+
+	scoreboard = dict(reversed(points.items()))
+	# print(scoreboard)
+
+	# Prints final scoreboard with place
+	# counter = 1
+	# for team, score in scoreboard.items():
+	# 	print(f"{ordinal(counter)} place: {team} with {score} points")
+	# 	counter += 1
+	headers = ["team name", "points"]
+	print(tbl(scoreboard.items(), tablefmt="github", headers=headers))
+
 else:
 	# TODO: indiviuals
 	pass
-
-for team in points:
-	print(f"{team}: {points[team]}")
 
 # print(team_members)
